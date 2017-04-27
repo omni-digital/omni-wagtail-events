@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'omni_wagtail_events',
-
 ]
 
 MIDDLEWARE = MIDDLEWARE_CLASSES = [
@@ -71,6 +70,7 @@ TEMPLATES = [
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
             os.path.join(PROJECT_DIR, 'app', 'templates'),
+            os.path.join(PROJECT_DIR, 'omni_wagtail_events', 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -94,7 +94,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(PROJECT_DIR, 'db.sqlite3'),
     }
 }
 
