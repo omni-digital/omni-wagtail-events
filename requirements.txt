@@ -1,2 +1,2 @@
-django
-wagtail
+django==1.10
+wagtail==1.9.1
