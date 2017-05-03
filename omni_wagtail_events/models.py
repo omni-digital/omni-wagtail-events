@@ -287,9 +287,6 @@ class EventDetailPage(Page):
         """
         Create corresponding `EventDatePage` model.
         """
-        if self.is_recurring():
-            return
-
         self.refresh_from_db()
         return self.event_dates.create(
             start_time=self.start_time,
