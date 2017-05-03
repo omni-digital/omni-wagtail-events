@@ -15,9 +15,10 @@ from isoweek import Week
 from django.db import models
 from django.utils.timezone import now
 
+from modelcluster.fields import ParentalKey
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, FieldRowPanel
 from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailcore.models import Page, PageManager
+from wagtail.wagtailcore.models import Orderable, Page, PageManager
 
 from omni_wagtail_events import utils
 
@@ -49,7 +50,7 @@ class EventListingPage(Page):
         """
 
         return EventDetailPage.objects.filter(
-            models.Q(id__in=EventDatePage.objects.parent_ids_by_date(start_date, end_date)) |
+            models.Q(id__in=EventDate.objects.parent_ids_by_date(start_date, end_date)) |
             models.Q(id__in=EventDetailPage.objects.recurring_events().values_list('id', flat=True)))
 
     def get_year_agenda(self, year=None):
@@ -202,7 +203,6 @@ class EventDetailPage(Page):
     end_time = models.DateTimeField(blank=True, null=True)
 
     parent_page_types = ['EventListingPage']
-    subpage_types = ['EventDatePage']
 
     content_panels = Page.content_panels + [
         FieldPanel('content'),
@@ -232,7 +232,6 @@ class EventDetailPage(Page):
                 result.append(date, False)
 
         return result
-
 
     def happens_in_date(self, check_date):
         """
@@ -291,38 +290,56 @@ class EventDetailPage(Page):
         if self.is_recurring():
             return
 
-        # Delete existing dates
-        self.get_children().delete()
-
         self.refresh_from_db()
-
-        return self.add_child(instance=EventDatePage(
-            title='{0}: {1}'.format(str(self.start_time.date()), self.title),
+        return self.event_dates.create(
             start_time=self.start_time,
             end_time=self.end_time,
-        ))
+        )
 
     def save(self, *args, **kwargs):
-        super(EventDetailPage, self).save(*args, **kwargs)
+        instance = super(EventDetailPage, self).save(*args, **kwargs)
         self.create_event_date()
+        return instance
 
 
-class EventDatePageManager(PageManager):
+class EventDatePageManager(models.Manager):
+
+    def in_date_range(self, start, end):
+        """
+        Get event dates that appear between the start and end dates
+
+        :return: Filtered django model queryset
+        """
+        return self.get_queryset().filter(start_time__gte=start, end_time__lte=end)
 
     def parent_ids_by_date(self, start, end):
         """
         Get only events that are periodically recurring
         :return: Filtered django model queryset
         """
-        items = self.get_queryset().filter(start_time__gte=start, end_time__lte=end)
-        return [c.get_parent().id for c in items]
+        return self.in_date_range(start, end).values_list('page_id', flat=True)
 
-class EventDatePage(Page):
+
+class EventDate(models.Model):
     """
     Event occurrence concrete model 
     """
-    objects = EventDatePageManager()
-    parent_page_types = ['EventDetailPage']
-
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
+
+    panels = [
+        FieldPanel('start_time'),
+        FieldPanel('end_time')
+    ]
+
+    class Meta:
+        abstract = True
+
+
+class EventDetailDatePage(Orderable, EventDate):
+    """
+    Associates an event page and an event date
+    """
+    page = ParentalKey(EventDetailPage, related_name='event_dates')
+
+    objects = EventDatePageManager()
