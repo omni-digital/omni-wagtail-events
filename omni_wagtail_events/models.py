@@ -288,10 +288,29 @@ class EventDetailPage(Page):
         Create corresponding `EventDatePage` model.
         """
         self.refresh_from_db()
-        return self.event_dates.create(
+        self.event_dates.delete()
+
+        self.event_dates.create(
             start_time=self.start_time,
             end_time=self.end_time,
         )
+
+        if self.is_recurring():
+            start_date = self.start_time
+            end_date = self.end_time
+            days_map = {
+                1: 1,  # day
+                2: 7,  # week
+                3: 30,  # month
+                4: 365  # year
+            }
+            for i in range(0, self.repeat):
+                start_date = start_date + timedelta(days=days_map[self.period])
+                end_date = end_date + timedelta(days=days_map[self.period])
+                self.event_dates.create(
+                    start_time=self.start_time,
+                    end_time=self.end_time
+                )
 
     def save(self, *args, **kwargs):
         instance = super(EventDetailPage, self).save(*args, **kwargs)
