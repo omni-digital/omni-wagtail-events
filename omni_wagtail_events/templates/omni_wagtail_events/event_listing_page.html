@@ -1,17 +1,45 @@
 {% load i18n %}
 {% load wagtailcore_tags %}
+{% load omni_wagtail_events_tags %}
 
-<h1>
-    {{  page.title }}
-</h1>
+<h1>{{  page.title }}</h1>
 
-{% if page.get_children %}
+{{ page.content|safe }}
+
+{% trans "Time scope" %}
+
+<ol>
+    <li><a href="{% patch_scope "day" %}">{% trans "Day" %}</a></li>
+    <li><a href="{% patch_scope "week" %}">{% trans "Week" %}</a></li>
+    <li><a href="{% patch_scope "month" %}">{% trans "Month" %}</a></li>
+    <li><a href="{% patch_scope "year" %}">{% trans "Year" %}</a></li>
+</ol>
+
+<h2>{% trans "Agenda" %} ({{ agenda.scope }}) | {{ agenda.start_date }} - {{ agenda.end_date }}</h2>
+
+<p>{% trans "Results found" %}:{{ agenda.items|length }}</p>
+
+<p>
+    <a href="{% patch_start_date agenda.previous_date %}">{% trans "Previous" %}</a> |
+    <a href="{% patch_start_date agenda.next_date %}">{% trans "Next" %}</a>
+</p>
+
+{% if agenda.items %}
     <ul>
-        {% for child in page.get_children %}
+        {% for item in agenda.items %}
             <li>
-                <a href="{% pageurl child %}">
-                    {{ child }}
-                </a>
+                <dl>
+                    <dt>Event</dt>
+                    <dd>{{ item.page }}</dd>
+                    <dt>Description</dt>
+                    <dd>{{ item.page.content|safe }}</dd>
+                    <dt>Start time</dt>
+                    <dd>{{ item.start_time|time }}</dd>
+                    {% if item.page.end_time %}
+                        <dt>End time</dt>
+                        <dd>{{ item.end_time|time }}</dd>
+                    {% endif %}
+                </dl>
             </li>
         {% endfor %}
     </ul>
