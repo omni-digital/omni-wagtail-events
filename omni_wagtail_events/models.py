@@ -24,6 +24,9 @@ from omni_wagtail_events import utils
 from omni_wagtail_events import managers
 
 
+_DATE_FORMAT_RE = '^([0-9]){4}\.([0-9]){2}\.([0-9]){2}$'
+
+
 class EventListingPage(Page):
     """
     Event index page
@@ -153,7 +156,7 @@ class EventListingPage(Page):
             return context
 
         start_date = request.GET.get('start_date', '')
-        if re.match('^([0-9]){4}\.([0-9]){2}\.([0-9]){2}$', start_date):
+        if re.match(_DATE_FORMAT_RE, start_date):
             date_params = [int(i) for i in start_date.split('.')]
             start_date = utils.date_to_datetime(datetime.date(*date_params))
         else:
@@ -256,6 +259,7 @@ class EventDetailPage(Page):
         self.event_dates.create(
             start_time=self.start_time,
             end_time=self.end_time,
+            page=self,
         )
 
         if self.is_recurring():
