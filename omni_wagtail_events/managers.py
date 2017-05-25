@@ -26,7 +26,7 @@ class AgendaItemsManager(models.Manager):
         """
         start = self._get_min_time(start)
         end = self._get_min_time(end)
-        return self.filter(start_time__gte=start, end_time__lte=end)
+        return self.filter(start_time__gte=start, start_time__lte=end)
 
     def parent_ids_by_date(self, start, end):
         """
