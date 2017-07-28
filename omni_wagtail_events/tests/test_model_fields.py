@@ -9,7 +9,7 @@ from django.db import models
 from django.test import TestCase
 
 from wagtail.wagtailcore.fields import RichTextField
-from omni_wagtail_events.models import EventListingPage, EventDetailPage, EventDatePage
+from omni_wagtail_events.models import EventListingPage, EventDetailPage
 
 
 class EventListingPageModelFieldTestCase(TestCase):
@@ -37,7 +37,7 @@ class EventListingPageModelFieldTestCase(TestCase):
         self.assertFalse(field.null)
 
     def test_subpage_types(self):
-        """ 
+        """
         The model should have EventDetailPage in allowed subpage types
         """
         self.assertIn('EventDetailPage', self.model.subpage_types)
@@ -96,38 +96,7 @@ class EventDetailPageModelFieldTestCase(TestCase):
         self.assertTrue(field.null)
 
     def test_parent_page_types(self):
-        """ 
+        """
         The model should have EventListingPage in allowed parent page types
         """
         self.assertIn('EventListingPage', self.model.parent_page_types)
-
-
-class EventDatePageModelFieldTestCase(TestCase):
-    """
-    Testing omni_wagtail_events.models.EventDatePage
-    """
-    model = EventDatePage
-
-    def test_start_time_field(self):
-        """
-        The model should have a `start_time` field
-        """
-        field = self.model._meta.get_field('start_time')
-        self.assertIsInstance(field, models.DateTimeField)
-        self.assertFalse(field.blank)
-        self.assertFalse(field.null)
-
-    def test_end_time_field(self):
-        """
-        The model should have a `end_time` field
-        """
-        field = self.model._meta.get_field('end_time')
-        self.assertIsInstance(field, models.DateTimeField)
-        self.assertTrue(field.blank)
-        self.assertTrue(field.null)
-
-    def test_parent_page_types(self):
-        """ 
-        The model should have EventListingPage in allowed parent page types
-        """
-        self.assertIn('EventDetailPage', self.model.parent_page_types)

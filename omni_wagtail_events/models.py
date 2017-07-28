@@ -18,8 +18,9 @@ from django.utils.timezone import now
 from modelcluster.fields import ParentalKey
 from wagtail.wagtailadmin.edit_handlers import FieldPanel, FieldRowPanel
 from wagtail.wagtailcore.fields import RichTextField
-from wagtail.wagtailcore.models import Orderable, Page
+from wagtail.wagtailcore.models import Page
 
+from omni_wagtail_events import abstract_models as abstract
 from omni_wagtail_events import utils
 from omni_wagtail_events import managers
 
@@ -27,16 +28,14 @@ from omni_wagtail_events import managers
 _DATE_FORMAT_RE = '^([0-9]){4}\.([0-9]){2}\.([0-9]){2}$'
 
 
-class EventListingPage(Page):
+class EventListingPage(abstract.AbstractEventListingPage):
     """
     Event index page
     """
     content = RichTextField()
-    paginate_by = models.IntegerField()
 
-    content_panels = Page.content_panels + [
+    content_panels = abstract.AbstractEventListingPage.content_panels + [
         FieldPanel('content'),
-        FieldPanel('paginate_by'),
     ]
 
     subpage_types = ['EventDetailPage']
@@ -45,7 +44,7 @@ class EventListingPage(Page):
     def get_period_items(start_date, end_date):
         """
         Get list of matching events (both - recurring and single time)
-        
+
         :param start_date: period start date
         :type start_date: datetime
         :param end_date: period end date
@@ -57,7 +56,7 @@ class EventListingPage(Page):
     def get_year_agenda(self, start_date):
         """
         Get list of events that will occur in the given year
-        
+
         :param start_date: period start_date
         :type start_date: datetime.datetime()
         :return: data dictionary
@@ -78,7 +77,7 @@ class EventListingPage(Page):
     def get_month_agenda(self, start_date):
         """
         Get list of events that will occur in the given week
-        
+
         :param start_date: period start_date
         :type start_date: datetime.datetime()
         :return: data dictionary
@@ -97,7 +96,7 @@ class EventListingPage(Page):
     def get_week_agenda(self, start_date):
         """
         Get list of events that will occur in the given week
-        
+
         :param start_date: period start_date
         :type start_date: datetime.datetime()
         :return: data dictionary
@@ -117,7 +116,7 @@ class EventListingPage(Page):
     def get_day_agenda(self, start_date):
         """
         Get list of events that will occur in the given date
-        
+
         :param start_date: period start_date
         :type start_date: datetime.datetime()
         :return: data dictionary
@@ -135,6 +134,7 @@ class EventListingPage(Page):
     def get_context(self, request, *args, **kwargs):
         """
         Adds child pages to the context and paginates them if pagination is required
+
         :param request: HttpRequest instance
         :param args: default positional args
         :param kwargs: default keyword args
@@ -168,22 +168,21 @@ class EventListingPage(Page):
 
 
 class EventDetailPage(Page):
-    """
-    Event details concrete model
-    """
-
-    content = RichTextField()
-
-    repeat = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
-
+    """Event details concrete model."""
     PERIODS = (
         (1, 'days'),
         (2, 'weeks'),
         (3, 'months'),
         (4, 'years'),
     )
-    period = models.PositiveSmallIntegerField(choices=PERIODS, blank=True, null=True)
 
+    content = RichTextField()
+    period = models.PositiveSmallIntegerField(
+        blank=True,
+        choices=PERIODS,
+        null=True,
+    )
+    repeat = models.PositiveSmallIntegerField(blank=True, null=True, default=0)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField(blank=True, null=True)
 
@@ -192,14 +191,17 @@ class EventDetailPage(Page):
     content_panels = Page.content_panels + [
         FieldPanel('content'),
         FieldRowPanel([FieldPanel('repeat'), FieldPanel('period')]),
-        FieldRowPanel([FieldPanel('start_time'), FieldPanel('end_time')], 'Date of occurrence'),
+        FieldRowPanel(
+            [FieldPanel('start_time'), FieldPanel('end_time')],
+            'Date of occurrence'
+        ),
     ]
 
     def is_recurring(self):
         """
         Check if the event is recurring
-        
-        :return: Boolean 
+
+        :return: Boolean
         """
         if self.period and self.repeat:
             return True
@@ -209,9 +211,9 @@ class EventDetailPage(Page):
     def happens_in_date(self, check_date):
         """
         Check if the recurring event happens in a given date
-        
-        :param check_date:  
-        :return: 
+
+        :param check_date:
+        :return:
         """
 
         start_date = self.start_time.date()
@@ -229,9 +231,9 @@ class EventDetailPage(Page):
 
     def get_recurring_period_in_days(self):
         """
-        Get event recurring period in days. We don't care for a now that there are different 
-        months and different years
-        
+        Get event recurring period in days. We don't care for a now that
+        there are different months and different years.
+
         :return: integer
         """
         if not self.is_recurring():
@@ -247,9 +249,7 @@ class EventDetailPage(Page):
         return self.repeat * days_map.get(self.period)
 
     def create_agenda_items(self):
-        """
-        Create corresponding `AgendaItems` object.
-        """
+        """Create corresponding `AgendaItems` object."""
         self.refresh_from_db()
 
         for item in self.event_dates.all():
@@ -268,7 +268,11 @@ class EventDetailPage(Page):
             start_time = self.start_time
             end_time = self.end_time
             for i in range(0, self.repeat):
-                instance = self.event_dates.create(start_time=start_time, end_time=end_time, page=self)
+                instance = self.event_dates.create(
+                    start_time=start_time,
+                    end_time=end_time,
+                    page=self
+                )
                 instance.save()
                 start_time += delta
                 end_time += delta
@@ -276,7 +280,7 @@ class EventDetailPage(Page):
     def save(self, *args, **kwargs):
         """
         Model `save()` method.
-        
+
         :param args: default args
         :param kwargs: default kwargs
         :return: instance of the saved object
@@ -286,18 +290,7 @@ class EventDetailPage(Page):
         return instance
 
 
-class AgendaItems(Orderable, models.Model):
-    """
-    Associates an event page and an event date
-    """
-    start_time = models.DateTimeField()
-    end_time = models.DateTimeField(blank=True, null=True)
-
+class AgendaItems(abstract.AbstractAgendaItems):
+    """Associates an event page and an event date."""
     page = ParentalKey(EventDetailPage, related_name='event_dates')
-
     objects = managers.AgendaItemsManager()
-
-    panels = [
-        FieldPanel('start_time'),
-        FieldPanel('end_time')
-    ]
