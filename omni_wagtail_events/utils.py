@@ -20,13 +20,14 @@ def date_to_datetime(date, time_choice='min'):
     choice = getattr(datetime.datetime, 'min' if time_choice == 'min' else 'max').time()
     return datetime.datetime.combine(date, choice)
 
+
 def add_months(date, months):
     """
     Add months to the date
-    
-    :param date: 
-    :param months: 
-    :return: 
+
+    :param date:
+    :param months:
+    :return:
     """
     month = date.month - 1 + months
     year = int(date.year + month / 12)
@@ -34,13 +35,14 @@ def add_months(date, months):
     day = min(date.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)
 
+
 def remove_months(date, months):
     """
     Add months to the date
 
-    :param date: 
-    :param months: 
-    :return: 
+    :param date:
+    :param months:
+    :return:
     """
     month = date.month - 1 - months
     year = int(date.year - month / 12)

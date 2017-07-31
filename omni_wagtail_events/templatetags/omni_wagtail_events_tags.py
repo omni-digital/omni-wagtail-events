@@ -18,7 +18,7 @@ except ImportError:
 def _patch(context, key, data):
     """
     Patch the GET value
-    
+
     :param context: template context dict
     :param key: item name
     :param data: item value
@@ -36,7 +36,7 @@ def patch_start_date(context, date):
 
     :param context: template context dict
     :param date: start_date
-    :return: 
+    :return:
     """
     return _patch(context, 'start_date', date.strftime('%Y.%m.%d'))
 
@@ -46,9 +46,9 @@ def patch_scope(context, scope):
     """
     Prepare scope for agenda
 
-    :param context: 
-    :param scope: 
-    :return: 
+    :param context:
+    :param scope:
+    :return:
     """
     return _patch(context, 'scope', scope)
 
@@ -58,9 +58,8 @@ def patch_page(context, page):
     """
     Prepare next_url for agenda
 
-    :param context: 
-    :param scope: 
-    :return: 
+    :param context:
+    :param scope:
+    :return:
     """
-    return _patch(context, 'scope', scope)
-
+    return _patch(context, 'page', page)
