@@ -1,9 +1,17 @@
 [paths]
 source =
-    omi_wagtail_library/
+    omni_wagtail_library/
 
 [run]
+branch = true
+
+[report]
 omit =
     env/*
-    */tests/*
     */migrations/*
+    *site-packages*
+    *tests*
+    *.tox*
+show_missing = True
+exclude_lines =
+    raise NotImplementedError
