@@ -33,8 +33,8 @@ class EventListingPageModelFieldTestCase(TestCase):
         """
         field = self.model._meta.get_field('paginate_by')
         self.assertIsInstance(field, models.IntegerField)
-        self.assertFalse(field.blank)
-        self.assertFalse(field.null)
+        self.assertTrue(field.blank)
+        self.assertTrue(field.null)
 
     def test_subpage_types(self):
         """

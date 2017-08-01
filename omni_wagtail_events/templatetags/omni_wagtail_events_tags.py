@@ -4,15 +4,16 @@ Application template tags
 """
 
 from __future__ import unicode_literals
+
 from django import template
-
-register = template.Library()
-
 
 try:
     import urllib.urlencode as urlencode
 except ImportError:
     from urllib.parse import urlencode
+
+
+register = template.Library()
 
 
 def _patch(context, key, data):

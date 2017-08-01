@@ -8,6 +8,8 @@ from __future__ import unicode_literals
 import calendar
 import datetime
 
+from django.utils import timezone
+
 
 def date_to_datetime(date, time_choice='min'):
     """
@@ -18,7 +20,10 @@ def date_to_datetime(date, time_choice='min'):
     :return: datetime
     """
     choice = getattr(datetime.datetime, 'min' if time_choice == 'min' else 'max').time()
-    return datetime.datetime.combine(date, choice)
+    return timezone.make_aware(
+        datetime.datetime.combine(date, choice),
+        timezone.get_current_timezone(),
+    )
 
 
 def add_months(date, months):
@@ -45,7 +50,7 @@ def remove_months(date, months):
     :return:
     """
     month = date.month - 1 - months
-    year = int(date.year - month / 12)
+    year = int(date.year + month / 12)
     month = month % 12 + 1
     day = min(date.day, calendar.monthrange(year, month)[1])
     return datetime.date(year, month, day)

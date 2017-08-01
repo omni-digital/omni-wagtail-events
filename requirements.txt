@@ -1,4 +1,8 @@
+coverage
 django==1.10
-wagtail==1.9.1
-python-dateutil==2.6.0
+flake8
 isoweek==1.1.0
+mock==2.0.0
+python-dateutil==2.6.0
+wagtail==1.9.1
+wagtail-factories==0.3.0
