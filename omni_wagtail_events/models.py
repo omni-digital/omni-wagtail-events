@@ -171,25 +171,23 @@ class EventListingPage(abstracts.AbstractEventListingPage):
         else:
             start_date = timezone.now()
 
-        context['agenda'] = time_periods[period](start_date)
-        """
+        agenda = time_periods[period](start_date)
         is_paginated = False
         paginator = None
 
         # Paginate the child nodes if paginate_by has been specified
         if self.paginate_by:
             is_paginated = True
-            queryset, paginator = self._paginate_queryset(
-                queryset,
+            agenda['items'], paginator = self._paginate_queryset(
+                agenda['items'],
                 request.GET.get('page')
             )
 
         context.update(
-            queryset=queryset,
+            agenda=agenda,
             paginator=paginator,
             is_paginated=is_paginated
         )
-        """
         return context
 
 

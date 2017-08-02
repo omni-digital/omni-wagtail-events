@@ -1,48 +1,52 @@
-{% load i18n %}
-{% load wagtailcore_tags %}
-{% load omni_wagtail_events_tags %}
+{% load i18n omni_wagtail_events_tags wagtailcore_tags %}
 
-<h1>{{  page.title }}</h1>
 
-{{ page.content|safe }}
+{% block content %}
+    <h1>{{  page.title }}</h1>
 
-{% trans "Time scope" %}
+    {{ page.content|safe }}
 
-<ol>
-    <li><a href="{% patch_scope "day" %}">{% trans "Day" %}</a></li>
-    <li><a href="{% patch_scope "week" %}">{% trans "Week" %}</a></li>
-    <li><a href="{% patch_scope "month" %}">{% trans "Month" %}</a></li>
-    <li><a href="{% patch_scope "year" %}">{% trans "Year" %}</a></li>
-</ol>
+    {% trans "Time scope" %}
 
-<h2>{% trans "Agenda" %} ({{ agenda.scope }}) | {{ agenda.start_date }} - {{ agenda.end_date }}</h2>
+    <ol>
+        <li><a href="{% patch_scope "day" %}">{% trans "Day" %}</a></li>
+        <li><a href="{% patch_scope "week" %}">{% trans "Week" %}</a></li>
+        <li><a href="{% patch_scope "month" %}">{% trans "Month" %}</a></li>
+        <li><a href="{% patch_scope "year" %}">{% trans "Year" %}</a></li>
+    </ol>
 
-<p>{% trans "Results found" %}:{{ agenda.items|length }}</p>
+    <h2>{% trans "Agenda" %} ({{ agenda.scope }}) | {{ agenda.start_date }} - {{ agenda.end_date }}</h2>
 
-<p>
-    <a href="{% patch_start_date agenda.previous_date %}">{% trans "Previous" %}</a> |
-    <a href="{% patch_start_date agenda.next_date %}">{% trans "Next" %}</a>
-</p>
+    <p>{% trans "Results found" %}:{{ agenda.items|length }}</p>
 
-{% if agenda.items %}
-    <ul>
-        {% for item in agenda.items %}
-            <li>
-                <dl>
-                    <dt>Event</dt>
-                    <dd>{{ item.page }}</dd>
-                    <dt>Description</dt>
-                    <dd>{{ item.page.content|safe }}</dd>
-                    <dt>Start time</dt>
-                    <dd>{{ item.start_time|time }}</dd>
-                    {% if item.page.end_time %}
-                        <dt>End time</dt>
-                        <dd>{{ item.end_time|time }}</dd>
-                    {% endif %}
-                </dl>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>{% trans "No events found" %}</p>
-{% endif %}
+    <p>
+        <a href="{% patch_start_date agenda.previous_date %}">{% trans "Previous" %}</a> |
+        <a href="{% patch_start_date agenda.next_date %}">{% trans "Next" %}</a>
+    </p>
+
+    {% if agenda.items %}
+        <ul>
+            {% for item in agenda.items %}
+                <li>
+                    <dl>
+                        <dt>Event</dt>
+                        <dd>{{ item.page }}</dd>
+                        <dt>Description</dt>
+                        <dd>{{ item.page.content|safe }}</dd>
+                        <dt>Start time</dt>
+                        <dd>{{ item.start_time|time }}</dd>
+                        {% if item.page.end_time %}
+                            <dt>End time</dt>
+                            <dd>{{ item.end_time|time }}</dd>
+                        {% endif %}
+                    </dl>
+                </li>
+            {% endfor %}
+        </ul>
+        {% if is_paginated %}
+            {% include "includes/paginator.html" with page=agenda.items %}
+        {% endif %}
+    {% else %}
+        <p>{% trans "No events found" %}</p>
+    {% endif %}
+{% endblock %}

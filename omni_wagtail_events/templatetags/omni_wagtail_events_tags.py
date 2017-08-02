@@ -64,3 +64,23 @@ def patch_page(context, page):
     :return:
     """
     return _patch(context, 'page', page)
+
+
+@register.simple_tag(takes_context=True)
+def querystring(context, *args, **kwargs):
+    """
+    Display all GET values (except page) encoded as url params
+
+    :param context: template context
+    :return: string|encoded params as urlstring
+    """
+    try:
+        params = context['request'].GET.dict()
+    except (KeyError, AttributeError):
+        params = {}
+    else:
+        for value in args:
+            params.pop(value, None)
+        for key, value in kwargs.items():
+            params[key] = value
+    return urlencode(params)

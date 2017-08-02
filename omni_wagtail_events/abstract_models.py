@@ -24,6 +24,23 @@ class AbstractEventListingPage(Page):
         """Django model meta options."""
         abstract = True
 
+    def _paginate_queryset(self, queryset, page):
+        """
+        Helper method for paginating the queryset provided.
+
+        :param queryset: Queryset of model instances to paginate
+        :param page: Raw page number taken from the request dict
+        :return: Queryset of child model instances
+        """
+        paginator = Paginator(queryset, self.paginate_by)
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+        except EmptyPage:
+            queryset = paginator.page(paginator.num_pages)
+        return queryset, paginator
+
 
 class AbstractEventDetailPage(Page):
     """ """
@@ -99,23 +116,6 @@ class AbstractEventDetailPage(Page):
             4: 365  # year
         }
         return days_map.get(self.period)
-
-    def _paginate_queryset(self, queryset, page):
-        """
-        Helper method for paginating the queryset provided.
-
-        :param queryset: Queryset of model instances to paginate
-        :param page: Raw page number taken from the request dict
-        :return: Queryset of child model instances
-        """
-        paginator = Paginator(queryset, self.paginate_by)
-        try:
-            queryset = paginator.page(page)
-        except PageNotAnInteger:
-            queryset = paginator.page(1)
-        except EmptyPage:
-            queryset = paginator.page(paginator.num_pages)
-        return queryset, paginator
 
 
 class AbstractAgendaItems(Orderable, models.Model):
