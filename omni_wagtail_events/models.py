@@ -5,12 +5,10 @@ Application models
 
 from __future__ import unicode_literals
 
-import re
 
-from datetime import date, datetime, timedelta
+from datetime import datetime, timedelta
 from isoweek import Week
 
-from django.utils import timezone
 from modelcluster.fields import ParentalKey
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.fields import RichTextField
@@ -18,9 +16,6 @@ from wagtail.wagtailcore.fields import RichTextField
 from omni_wagtail_events import abstract_models as abstracts
 from omni_wagtail_events import utils
 from omni_wagtail_events import managers
-
-
-_DATE_FORMAT_RE = '^([0-9]){4}\.([0-9]){2}\.([0-9]){2}$'
 
 
 class EventListingPage(abstracts.AbstractEventListingPage):
@@ -150,45 +145,7 @@ class EventListingPage(abstracts.AbstractEventListingPage):
         :return: Context data to use when rendering the template
         """
         context = super(EventListingPage, self).get_context(request, *args, **kwargs)
-
-        default_period = 'day'
-        time_periods = {
-            'year': self.get_year_agenda,
-            'week': self.get_week_agenda,
-            'month': self.get_month_agenda,
-            default_period: self.get_day_agenda,
-        }
-
-        period = request.GET.get('scope', default_period).lower()
-
-        if period not in time_periods.keys():
-            return context
-
-        start_date = request.GET.get('start_date', '')
-        if re.match(_DATE_FORMAT_RE, start_date):
-            date_params = [int(i) for i in start_date.split('.')]
-            start_date = utils.date_to_datetime(date(*date_params))
-        else:
-            start_date = timezone.now()
-
-        agenda = time_periods[period](start_date)
-        is_paginated = False
-        paginator = None
-
-        # Paginate the child nodes if paginate_by has been specified
-        if self.paginate_by:
-            is_paginated = True
-            agenda['items'], paginator = self._paginate_queryset(
-                agenda['items'],
-                request.GET.get('page')
-            )
-
-        context.update(
-            agenda=agenda,
-            paginator=paginator,
-            is_paginated=is_paginated
-        )
-        return context
+        return utils.get_extra_context(context, self, request)
 
 
 class EventDetailPage(abstracts.AbstractEventDetailPage):
