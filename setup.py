@@ -11,7 +11,7 @@ setup(
       author_email='dev@omni-digital.co.uk',
       url='https://github.com/omni-digital/omni-wagtail-events',
       download_url='https://github.com/omni-digital/omni-wagtail-events/tarball/0.1.0',
-      packages=find_packages(exclude=['app']),
+      packages=find_packages(),
       license='MIT',
       classifiers=[
             'Development Status :: 4 - Beta',
@@ -23,7 +23,8 @@ setup(
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: 3.4',
             'Programming Language :: Python :: 3.5'
+            'Programming Language :: Python :: 3.6'
       ],
       include_package_data=True,
-      keywords=['wagtail', 'django', 'mvc']
+      keywords=['wagtail', 'django', 'events']
 )

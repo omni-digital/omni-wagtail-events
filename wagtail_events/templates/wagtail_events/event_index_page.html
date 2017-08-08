@@ -1,0 +1,28 @@
+{% load i18n wagtailcore_tags %}
+
+
+{% block content %}
+    <h1>{{  page.title }}</h1>
+
+    {{ page.body|safe }}
+
+    {% if children %}
+        <ul>
+            {% for child in children %}
+                <li>
+                    <a href="{{ child.url }}">{{ child.event }} | {{ child.title }}</a>
+                    <p><strong>Start Date:</strong> {{ child.start_date }}</p>
+                    {% if child.end_date %}
+                    <p><strong>End Date:</strong> {{ child.end_date }}</p>
+                    {% endif %}
+                    <p>{{ child.body|safe }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+        {% if is_paginated %}
+            {% include "includes/paginator.html" with page=agenda.items %}
+        {% endif %}
+    {% else %}
+        <p>{% trans "No events found" %}</p>
+    {% endif %}
+{% endblock %}
