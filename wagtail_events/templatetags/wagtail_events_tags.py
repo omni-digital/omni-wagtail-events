@@ -17,6 +17,7 @@ register = template.Library()
 def querystring(context, *args, **kwargs):
     """
     Display all GET values (except page) encoded as url params
+
     :param context: template context
     :return: string|encoded params as urlstring
     """

@@ -9,8 +9,9 @@ from wagtail_events.templatetags import wagtail_events_tags
 
 
 class TestQueryString(TestCase):
-    """ """
+    """Tests for the querystring template tag."""
     def test_no_querystring(self):
+        """Test the querystring handles no input."""
         request = RequestFactory().get('')
         context = {'request': request}
         response = wagtail_events_tags.querystring(context)
@@ -18,13 +19,15 @@ class TestQueryString(TestCase):
         self.assertEqual(response, '')
 
     def test_querystring_existing(self):
-        request = RequestFactory().get('', {'scope': 'year'})
+        """Test querystring method handles existing querystrings."""
+        request = RequestFactory().get('', {'page': '1'})
         context = {'request': request}
         response = wagtail_events_tags.querystring(context, scope='year')
 
-        self.assertEqual(response, 'scope=year')
+        self.assertEqual(response, 'scope=year&page=1')
 
     def test_querystring(self):
+        """Test querystring method overwrites existing matching querystrings."""
         request = RequestFactory().get('', {'scope': 'day'})
         context = {'request': request}
         response = wagtail_events_tags.querystring(
@@ -37,32 +40,27 @@ class TestQueryString(TestCase):
 
 
 class TestPatch(TestCase):
-    """ """
-    def test_patch(self):
+    """Tests for the _patch template tags."""
+    def setUp(self):
         request = RequestFactory().get('')
-        context = {'request': request}
-        response = wagtail_events_tags._patch(context, 'foo', 'bar')
+        self.context = {'request': request}
+
+    def test_patch(self):
+        """Test _patch retuns the correct data."""
+        response = wagtail_events_tags._patch(self.context, 'foo', 'bar')
 
         self.assertEqual(response, '?foo=bar')
 
-
-class TestPatchScope(TestCase):
-    """ """
     def test_patch_scope(self):
-        request = RequestFactory().get('')
-        context = {'request': request}
-        response = wagtail_events_tags.patch_scope(context, 'foo')
+        """Test patch_scope retuns the correct data with scope."""
+        response = wagtail_events_tags.patch_scope(self.context, 'foo')
 
         self.assertEqual(response, '?scope=foo')
 
-
-class TestStartDate(TestCase):
-    """ """
     def test_patch_start_date(self):
-        request = RequestFactory().get('')
-        context = {'request': request}
+        """Test patch_start_date retuns the correct data with start_date."""
         time = timezone.now()
-        response = wagtail_events_tags.patch_start_date(context, time)
+        response = wagtail_events_tags.patch_start_date(self.context, time)
 
         self.assertEqual(
             response,

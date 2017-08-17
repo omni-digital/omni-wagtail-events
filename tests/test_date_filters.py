@@ -12,8 +12,8 @@ from wagtail_events import date_filters
 from wagtail_events.models import EventDetailPage, EventInstance
 
 
-class TestGetAgendas(TestCase):
-    """ """
+class TestAgendas(TestCase):
+    """Tests for the get_*_agenda methods."""
     def setUp(self):
         self.now = timezone.now()
         self.detail = EventDetailPageFactory.create(parent=None)
@@ -23,7 +23,7 @@ class TestGetAgendas(TestCase):
         )
 
     def test_get_year_agenda(self):
-        """ """
+        """Test get_year_agenda returns the expected data."""
         instance_two = EventInstanceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(days=365),
@@ -39,7 +39,7 @@ class TestGetAgendas(TestCase):
         self.assertNotIn(instance_two, response['items'])
 
     def test_get_month_agenda(self):
-        """ """
+        """Test get_month_agenda returns the expected data."""
         instance_two = EventInstanceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(weeks=4),
@@ -55,7 +55,7 @@ class TestGetAgendas(TestCase):
         self.assertNotIn(instance_two, response['items'])
 
     def test_get_week_agenda(self):
-        """ """
+        """Test get_week_agenda returns the expected data."""
         instance_two = EventInstanceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(weeks=1),
@@ -71,7 +71,7 @@ class TestGetAgendas(TestCase):
         self.assertNotIn(instance_two, response['items'])
 
     def test_get_day_agenda(self):
-        """ """
+        """Test get_day_agenda returns the expected data."""
         instance_two = EventInstanceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(days=1),
