@@ -1,5 +1,4 @@
 # -*- coding:utf8 -*-
-"""omni_wagtail_events abstract models"""
 
 from __future__ import unicode_literals
 
@@ -9,6 +8,7 @@ from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
 
 from wagtail_events.managers import EventInstanceManager
+from wagtail_events.utils import _DATE_FORMAT_RE
 
 
 class AbstractPaginatedIndexPage(Page):
@@ -59,7 +59,11 @@ class AbstractPaginatedIndexPage(Page):
         :param kwargs: default keyword args
         :return: Context data to use when rendering the template
         """
-        context = super(AbstractPaginatedIndexPage, self).get_context(request, *args, **kwargs)
+        context = super(AbstractPaginatedIndexPage, self).get_context(
+            request,
+            *args,
+            **kwargs
+        )
         queryset = self._get_children(request)
         is_paginated = False
         paginator = None
@@ -67,7 +71,10 @@ class AbstractPaginatedIndexPage(Page):
         # Paginate the child nodes if paginate_by has been specified
         if self.paginate_by:
             is_paginated = True
-            queryset, paginator = self._paginate_queryset(queryset, request.GET.get('page'))
+            queryset['items'], paginator = self._paginate_queryset(
+                queryset['items'],
+                request.GET.get('page')
+            )
 
         context.update(
             children=queryset,
@@ -75,6 +82,17 @@ class AbstractPaginatedIndexPage(Page):
             is_paginated=is_paginated
         )
         return context
+
+
+class AbstractEventIndexPage(AbstractPaginatedIndexPage):
+    """ """
+    class Meta(object):
+        """Django model meta options."""
+        abstract = True
+
+    def get_dateformat(self):
+        """Returns the dateformat."""
+        return _DATE_FORMAT_RE
 
 
 class AbstractEventInstance(models.Model):

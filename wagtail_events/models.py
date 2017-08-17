@@ -52,7 +52,7 @@ class EventInstance(abstracts.AbstractEventInstance):
     panels = abstracts.AbstractEventInstance.panels + [FieldPanel('body')]
 
 
-class EventIndexPage(abstracts.AbstractPaginatedIndexPage):
+class EventIndexPage(abstracts.AbstractEventIndexPage):
     """ """
     body = RichTextField()
 
@@ -68,7 +68,6 @@ class EventIndexPage(abstracts.AbstractPaginatedIndexPage):
         :return: Queryset of child model instances
         """
         qs = super(EventIndexPage, self)._get_children(request)
-        filtered_qs = EventInstance.objects.filter(event__in=qs)
 
         default_period = 'day'
         time_periods = {
@@ -77,11 +76,10 @@ class EventIndexPage(abstracts.AbstractPaginatedIndexPage):
             'month': date_filters.get_month_agenda,
             default_period: date_filters.get_day_agenda,
         }
-
         period = request.GET.get('scope', default_period).lower()
 
         if period not in time_periods.keys():
-            return filtered_qs
+            return {'items': EventInstance.objects.filter(event__in=qs)}
 
         start_date = request.GET.get('start_date', '')
         if re.match(self.get_dateformat(), start_date):
@@ -90,10 +88,6 @@ class EventIndexPage(abstracts.AbstractPaginatedIndexPage):
         else:
             start_date = timezone.now()
 
-        return time_periods[period](filtered_qs, start_date)
-
-    def get_dateformat(self):
-        """Returns the dateformat."""
-        return utils._DATE_FORMAT_RE
+        return time_periods[period](EventInstance, qs, start_date)
 
     subpage_types = ['wagtail_events.EventDetailPage']

@@ -11,7 +11,7 @@ from isoweek import Week
 from wagtail_events import utils
 
 
-def get_year_agenda(queryset, start_date):
+def get_year_agenda(model, queryset, start_date):
     """
     Get list of events that will occur in the given year.
 
@@ -28,10 +28,10 @@ def get_year_agenda(queryset, start_date):
         'start_date': start_date,
         'end_date': end_date,
         'scope': 'Year',
-        'items': queryset.in_date_range(
+        'items': model.objects.in_date_range(
             start_date,
             utils.date_to_datetime(end_date, 'max')
-        ),
+        ).filter(event__in=queryset),
         'next_date': utils.date_to_datetime(
             utils.add_months(start_date.date(), 12)
         ),
@@ -41,7 +41,7 @@ def get_year_agenda(queryset, start_date):
     }
 
 
-def get_month_agenda(queryset, start_date):
+def get_month_agenda(model, queryset, start_date):
     """
     Get list of events that will occur in the given week.
 
@@ -59,7 +59,9 @@ def get_month_agenda(queryset, start_date):
         'start_date': start_date,
         'end_date': end_date,
         'scope': 'Month',
-        'items': queryset.in_date_range(start_date, end_date),
+        'items': model.objects.in_date_range(start_date, end_date).filter(
+            event__in=queryset
+        ),
         'next_date': utils.date_to_datetime(
             utils.add_months(start_date.date(), 1)
         ),
@@ -69,7 +71,7 @@ def get_month_agenda(queryset, start_date):
     }
 
 
-def get_week_agenda(queryset, start_date):
+def get_week_agenda(model, queryset, start_date):
     """
     Get list of events that will occur in the given week.
 
@@ -85,13 +87,15 @@ def get_week_agenda(queryset, start_date):
         'start_date': start_date,
         'end_date': end_date,
         'scope': 'Week',
-        'items': queryset.in_date_range(start_date, end_date),
+        'items': model.objects.in_date_range(start_date, end_date).filter(
+            event__in=queryset
+        ),
         'next_date': start_date + timedelta(days=7),
         'previous_date': start_date + timedelta(days=-7),
     }
 
 
-def get_day_agenda(queryset, start_date):
+def get_day_agenda(model, queryset, start_date):
     """
     Get list of events that will occur in the given date
 
@@ -105,7 +109,9 @@ def get_day_agenda(queryset, start_date):
         'start_date': start_date,
         'end_date': utils.date_to_datetime(start_date.date(), 'max'),
         'scope': 'Day',
-        'items': queryset.in_date_range(start_date, next_date),
+        'items': model.objects.in_date_range(start_date, next_date).filter(
+            event__in=queryset
+        ),
         'next_date': next_date,
         'previous_date': start_date + timedelta(days=-1),
     }

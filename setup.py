@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from __future__ import unicode_literals
-from omni_wagtail_events import __version__
+
+from wagtail_events import __version__
 from setuptools import setup, find_packages
 
 setup(

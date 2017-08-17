@@ -6,7 +6,7 @@
 
     {{ page.body|safe }}
 
-    {% if page.events %}
+    {% if page.events.all %}
         <ul>
             {% for event in page.events.all %}
                 <li>
