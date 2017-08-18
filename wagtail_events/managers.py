@@ -1,15 +1,14 @@
 # -*- coding:utf8 -*-
 """
-Application model managers
+Wagtail events model managers
 """
 
 from __future__ import unicode_literals
 
-from django.db import models
+from django.db.models import Manager
 
 
-class AgendaItemsManager(models.Manager):
-
+class EventInstanceManager(Manager):
     @staticmethod
     def _get_min_time(dt):
         """
@@ -26,11 +25,4 @@ class AgendaItemsManager(models.Manager):
         """
         start = self._get_min_time(start)
         end = self._get_min_time(end)
-        return self.filter(start_time__gte=start, start_time__lte=end)
-
-    def parent_ids_by_date(self, start, end):
-        """
-        Get only events that are periodically recurring
-        :return: Filtered django model queryset
-        """
-        return self.in_date_range(start, end).values_list('page_id', flat=True)
+        return self.filter(start_date__gte=start, start_date__lte=end)
