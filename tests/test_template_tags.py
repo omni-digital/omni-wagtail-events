@@ -24,7 +24,9 @@ class TestQueryString(TestCase):
         context = {'request': request}
         response = wagtail_events_tags.querystring(context, scope='year')
 
-        self.assertEqual(response, 'scope=year&page=1')
+        self.assertIn('scope=year', response)
+        self.assertIn('&', response)
+        self.assertIn('page=1', response)
 
     def test_querystring(self):
         """Test querystring method overwrites existing matching querystrings."""

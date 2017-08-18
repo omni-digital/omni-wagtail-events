@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 try:
     from urllib.parse import urlencode
 except ImportError:
-    from urlparse import parse_qs as urlencode
+    from urllib import urlencode
 
 from django import template
 

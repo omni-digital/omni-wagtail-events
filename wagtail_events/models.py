@@ -86,7 +86,12 @@ class EventIndexPage(abstracts.AbstractEventIndexPage):
             date_params = [int(i) for i in start_date.split('.')]
             start_date = utils.date_to_datetime(datetime.date(*date_params))
         else:
-            start_date = timezone.now()
+            start_date = timezone.now().replace(
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
 
         return time_periods[period](EventInstance, qs, start_date)
 
