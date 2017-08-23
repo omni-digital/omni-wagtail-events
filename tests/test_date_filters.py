@@ -7,30 +7,30 @@ from datetime import timedelta
 from django.test import TestCase
 from django.utils import timezone
 
-from tests.factories import EventDetailPageFactory, EventInstanceFactory
+from tests.factories import EventDetailFactory, EventOccurrenceFactory
 from wagtail_events import date_filters
-from wagtail_events.models import EventDetailPage, EventInstance
+from wagtail_events.models import EventDetail, EventOccurrence
 
 
 class TestAgendas(TestCase):
     """Tests for the get_*_agenda methods."""
     def setUp(self):
         self.now = timezone.now()
-        self.detail = EventDetailPageFactory.create(parent=None)
-        self.instance_one = EventInstanceFactory.create(
+        self.detail = EventDetailFactory.create(parent=None)
+        self.instance_one = EventOccurrenceFactory.create(
             event=self.detail,
             start_date=self.now,
         )
 
     def test_get_year_agenda(self):
         """Test get_year_agenda returns the expected data."""
-        instance_two = EventInstanceFactory.create(
+        instance_two = EventOccurrenceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(days=365),
         )
         response = date_filters.get_year_agenda(
-            EventInstance,
-            EventDetailPage.objects.all(),
+            EventOccurrence,
+            EventDetail.objects.all(),
             self.now,
         )
 
@@ -40,13 +40,13 @@ class TestAgendas(TestCase):
 
     def test_get_month_agenda(self):
         """Test get_month_agenda returns the expected data."""
-        instance_two = EventInstanceFactory.create(
+        instance_two = EventOccurrenceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(weeks=4),
         )
         response = date_filters.get_month_agenda(
-            EventInstance,
-            EventDetailPage.objects.all(),
+            EventOccurrence,
+            EventDetail.objects.all(),
             self.now,
         )
 
@@ -56,13 +56,13 @@ class TestAgendas(TestCase):
 
     def test_get_week_agenda(self):
         """Test get_week_agenda returns the expected data."""
-        instance_two = EventInstanceFactory.create(
+        instance_two = EventOccurrenceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(weeks=1),
         )
         response = date_filters.get_week_agenda(
-            EventInstance,
-            EventDetailPage.objects.all(),
+            EventOccurrence,
+            EventDetail.objects.all(),
             self.now,
         )
 
@@ -72,13 +72,13 @@ class TestAgendas(TestCase):
 
     def test_get_day_agenda(self):
         """Test get_day_agenda returns the expected data."""
-        instance_two = EventInstanceFactory.create(
+        instance_two = EventOccurrenceFactory.create(
             event=self.detail,
             start_date=self.now-timedelta(days=1),
         )
         response = date_filters.get_day_agenda(
-            EventInstance,
-            EventDetailPage.objects.all(),
+            EventOccurrence,
+            EventDetail.objects.all(),
             self.now,
         )
 

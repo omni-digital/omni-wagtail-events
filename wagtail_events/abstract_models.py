@@ -7,11 +7,11 @@ from django.db import models
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
 from wagtail.wagtailcore.models import Page
 
-from wagtail_events.managers import EventInstanceManager
+from wagtail_events.managers import EventOccurrenceManager
 from wagtail_events.utils import _DATE_FORMAT_RE
 
 
-class AbstractPaginatedIndexPage(Page):
+class AbstractPaginatedIndex(Page):
     """ """
     paginate_by = models.PositiveIntegerField(blank=True, null=True)
     content_panels = Page.content_panels + [FieldPanel('paginate_by')]
@@ -59,7 +59,7 @@ class AbstractPaginatedIndexPage(Page):
         :param kwargs: default keyword args
         :return: Context data to use when rendering the template
         """
-        context = super(AbstractPaginatedIndexPage, self).get_context(
+        context = super(AbstractPaginatedIndex, self).get_context(
             request,
             *args,
             **kwargs
@@ -84,7 +84,7 @@ class AbstractPaginatedIndexPage(Page):
         return context
 
 
-class AbstractEventIndexPage(AbstractPaginatedIndexPage):
+class AbstractEventIndex(AbstractPaginatedIndex):
     """ """
     class Meta(object):
         """Django model meta options."""
@@ -95,7 +95,7 @@ class AbstractEventIndexPage(AbstractPaginatedIndexPage):
         return _DATE_FORMAT_RE
 
 
-class AbstractEventInstance(models.Model):
+class AbstractEventOccurrence(models.Model):
     """ """
     title = models.CharField(max_length=255)
     start_date = models.DateTimeField()
@@ -106,7 +106,7 @@ class AbstractEventInstance(models.Model):
         abstract = True
         ordering = ['start_date']
 
-    objects = EventInstanceManager()
+    objects = EventOccurrenceManager()
 
     panels = [
         FieldPanel('title'),
