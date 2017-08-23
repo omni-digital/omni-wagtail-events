@@ -9,31 +9,31 @@ from wagtail_factories import PageFactory
 from wagtail_events import models
 
 
-class EventDetailPageFactory(PageFactory):
-    """Factory for wagtail_events.models.EventDetailPage"""
+class EventDetailFactory(PageFactory):
+    """Factory for wagtail_events.models.EventDetail"""
     title = factory.Sequence('Event {}'.format)
     body = factory.Sequence('Event {} information.'.format)
 
     class Meta(object):
         """Factory properties."""
-        model = models.EventDetailPage
+        model = models.EventDetail
 
 
-class EventIndexPageFactory(PageFactory):
-    """Factory for wagtail_events.models.EventIndexPage"""
+class EventIndexFactory(PageFactory):
+    """Factory for wagtail_events.models.EventIndex"""
     title = factory.Sequence('Event List {}'.format)
     body = factory.Sequence('Event List {} information.'.format)
 
     class Meta(object):
         """Factory properties."""
-        model = models.EventIndexPage
+        model = models.EventIndex
 
 
-class EventInstanceFactory(factory.django.DjangoModelFactory):
-    """Factory for wagtail_events.models.EventInstance"""
+class EventOccurrenceFactory(factory.django.DjangoModelFactory):
+    """Factory for wagtail_events.models.EventOccurrence"""
     title = factory.Sequence('Event instance {}'.format)
     body = factory.Sequence('Event instance {} information.'.format)
 
     class Meta(object):
         """Factory properties."""
-        model = models.EventInstance
+        model = models.EventOccurrence

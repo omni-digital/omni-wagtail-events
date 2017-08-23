@@ -14,22 +14,22 @@ from wagtail_factories import SiteFactory
 from tests import factories
 from wagtail_events import abstract_models
 from wagtail_events import models
-from wagtail_events.views import EventInstanceDetailView
+from wagtail_events.views import EventOccurrenceDetailView
 from wagtail_events.utils import _DATE_FORMAT_RE
 
 
-class TestEventDetailPage(TestCase):
-    """Tests for the EventDetailPage model."""
+class TestEventDetail(TestCase):
+    """Tests for the EventDetail model."""
     def setUp(self):
-        self.model = models.EventDetailPage
+        self.model = models.EventDetail
 
     def test_parent_class(self):
-        """EventDetailPage should inhert from Page & RoutablePageMixin."""
+        """EventDetail should inhert from Page & RoutablePageMixin."""
         self.assertTrue(issubclass(self.model, Page))
         self.assertTrue(issubclass(self.model, RoutablePageMixin))
 
     def test_body(self):
-        """Test the EventDetailPage.body field."""
+        """Test the EventDetail.body field."""
         field = self.model._meta.get_field('body')
 
         self.assertIsInstance(field, RichTextField)
@@ -37,11 +37,11 @@ class TestEventDetailPage(TestCase):
         self.assertFalse(field.null)
 
     def test_event_view(self):
-        """Test EventDetailPage.event_view returns the expected data."""
+        """Test EventDetail.event_view returns the expected data."""
         request = RequestFactory().get('')
         request.is_preview = False
-        detail = factories.EventDetailPageFactory.create(parent=None)
-        instance = factories.EventInstanceFactory.create(
+        detail = factories.EventDetailFactory.create(parent=None)
+        instance = factories.EventOccurrenceFactory.create(
             event=detail,
             start_date=timezone.now(),
         )
@@ -51,19 +51,19 @@ class TestEventDetailPage(TestCase):
         self.assertEqual(response.context_data['object'], instance)
         self.assertIsInstance(
             response.context_data['view'],
-            EventInstanceDetailView,
+            EventOccurrenceDetailView,
         )
 
 
-class TestEventIndexPage(TestCase):
-    """Tests for the EventIndexPage model."""
+class TestEventIndex(TestCase):
+    """Tests for the EventIndex model."""
     def setUp(self):
-        self.model = models.EventIndexPage
-        self.index = factories.EventIndexPageFactory.create(parent=None)
-        self.detail = factories.EventDetailPageFactory.create(
+        self.model = models.EventIndex
+        self.index = factories.EventIndexFactory.create(parent=None)
+        self.detail = factories.EventDetailFactory.create(
             parent=self.index
         )
-        self.instance = factories.EventInstanceFactory.create(
+        self.instance = factories.EventOccurrenceFactory.create(
             event=self.detail,
             start_date=timezone.now(),
         )
@@ -71,14 +71,14 @@ class TestEventIndexPage(TestCase):
         self.request.is_preview = False
 
     def test_parent_class(self):
-        """EventIndexPage should inhert from AbstractEventIndexPage."""
+        """EventIndex should inhert from AbstractEventIndex."""
         self.assertTrue(issubclass(
             self.model,
-            abstract_models.AbstractEventIndexPage
+            abstract_models.AbstractEventIndex
         ))
 
     def test_body(self):
-        """Test the EventIndexPage.body field."""
+        """Test the EventIndex.body field."""
         field = self.model._meta.get_field('body')
 
         self.assertIsInstance(field, RichTextField)
@@ -86,14 +86,14 @@ class TestEventIndexPage(TestCase):
         self.assertFalse(field.null)
 
     def test_get_children(self):
-        """Test EventIndexPage._get_children returns the expected data."""
+        """Test EventIndex._get_children returns the expected data."""
         response = self.index._get_children(self.request)
 
         self.assertEqual(response['items'][0], self.instance)
 
     def test_get_children_with_time(self):
         """
-        Test EventIndexPage._get_children returns the expected data.
+        Test EventIndex._get_children returns the expected data.
         When scope & start_date querystrings are provided the list of children
         will be filtered depending on scope from the startime.
         """
@@ -108,7 +108,7 @@ class TestEventIndexPage(TestCase):
 
     def test_get_children_bad_time_period(self):
         """
-        Test EventIndexPage._get_children returns default data when bad
+        Test EventIndex._get_children returns default data when bad
         querystrings are provided.
         """
         request = RequestFactory().get('', {'scope': 'bad_scope'})
@@ -118,14 +118,14 @@ class TestEventIndexPage(TestCase):
         self.assertEqual(response['items'][0], self.instance)
 
     def test_get_dateformat(self):
-        """EventIndexPage.get_dateformat should return the correct date format."""
+        """EventIndex.get_dateformat should return the correct date format."""
         response = self.index.get_dateformat()
 
         self.assertEqual(response, _DATE_FORMAT_RE)
 
     def test_pagination(self):
-        """Test EventIndexPage.get_context paginates correctly."""
-        factories.EventInstanceFactory.create(
+        """Test EventIndex.get_context paginates correctly."""
+        factories.EventOccurrenceFactory.create(
             event=self.detail,
             start_date=timezone.now(),
         )
@@ -138,20 +138,20 @@ class TestEventIndexPage(TestCase):
         self.assertIn(self.instance, response['children']['items'].object_list)
 
 
-class TestEventInstance(TestCase):
-    """Tests for the EventInstance model."""
+class TestEventOccurrence(TestCase):
+    """Tests for the EventOccurrence model."""
     def setUp(self):
-        self.model = models.EventInstance
+        self.model = models.EventOccurrence
 
     def test_parent_class(self):
-        """The EventInstance model should inhert from AbstractEventInstance."""
+        """The EventOccurrence model should inhert from AbstractEventOccurrence."""
         self.assertTrue(issubclass(
             self.model,
-            abstract_models.AbstractEventInstance
+            abstract_models.AbstractEventOccurrence
         ))
 
     def test_body(self):
-        """Test the EventInstance.body field."""
+        """Test the EventOccurrence.body field."""
         field = self.model._meta.get_field('body')
 
         self.assertIsInstance(field, RichTextField)
@@ -159,7 +159,7 @@ class TestEventInstance(TestCase):
         self.assertFalse(field.null)
 
     def test_event(self):
-        """Test the EventInstance.event relationship."""
+        """Test the EventOccurrence.event relationship."""
         field = self.model._meta.get_field('event')
 
         self.assertIsInstance(field, ParentalKey)
@@ -167,11 +167,11 @@ class TestEventInstance(TestCase):
         self.assertFalse(field.null)
 
     def test_url(self):
-        """Test the EventInstance.url method return the correct data."""
-        index = factories.EventIndexPageFactory.create(parent=None)
+        """Test the EventOccurrence.url method return the correct data."""
+        index = factories.EventIndexFactory.create(parent=None)
         SiteFactory.create(root_page=index)
-        detail = factories.EventDetailPageFactory.create(parent=index)
-        instance = factories.EventInstanceFactory.create(
+        detail = factories.EventDetailFactory.create(parent=index)
+        instance = factories.EventOccurrenceFactory.create(
             event=detail,
             start_date=timezone.now(),
         )

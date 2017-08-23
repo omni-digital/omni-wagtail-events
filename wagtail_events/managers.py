@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 from django.db.models import Manager
 
 
-class EventInstanceManager(Manager):
+class EventOccurrenceManager(Manager):
     @staticmethod
     def _get_min_time(dt):
         """
