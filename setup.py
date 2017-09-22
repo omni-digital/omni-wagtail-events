@@ -28,7 +28,7 @@ setup(
     ],
     include_package_data=True,
     install_requires=[
-        'wagtail>=1.9.1',
+        'wagtail>=1.8.0',
         'isoweek==1.1.0',
         'python-dateutil==2.6.0'
     ],
