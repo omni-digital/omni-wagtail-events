@@ -1,5 +1,6 @@
 django==1.10
 isoweek==1.1.0
+mock==2.0.0
 psycopg2==2.7.1
 python-dateutil==2.6.0
 wagtail==1.9.1
