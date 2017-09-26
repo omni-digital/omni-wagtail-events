@@ -2,9 +2,10 @@
 
 from __future__ import unicode_literals
 
-from django.core.paginator import Paginator
+from django.core.paginator import Page as PaginatorPage, Paginator
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
+from mock import patch, Mock
 from modelcluster.fields import ParentalKey
 from wagtail.contrib.wagtailroutablepage.models import RoutablePageMixin
 from wagtail.wagtailcore.fields import RichTextField
@@ -59,7 +60,10 @@ class TestEventIndex(TestCase):
     """Tests for the EventIndex model."""
     def setUp(self):
         self.model = models.EventIndex
-        self.index = factories.EventIndexFactory.create(parent=None)
+        self.index = factories.EventIndexFactory.create(
+            parent=None,
+            paginate_by=10
+        )
         self.detail = factories.EventDetailFactory.create(
             parent=self.index
         )
@@ -122,6 +126,49 @@ class TestEventIndex(TestCase):
         response = self.index.get_dateformat()
 
         self.assertEqual(response, _DATE_FORMAT_RE)
+
+    def test_get_paginator_class(self):
+        """The default implementation of _get_paginator_class should return djangos paginator"""
+        # Test the default implementation returns the expected class
+        self.assertEqual(self.index.get_paginator_class(), Paginator)
+
+        # Test the overridden implementation returns the expected class
+        self.index.paginator_class = Mock()
+        self.assertEqual(
+            self.index.get_paginator_class(),
+            self.index.paginator_class
+        )
+
+    def test_get_paginator(self):
+        """The _get_paginator method should return a paginator instance"""
+        object_list = ['foo', 'bar', 'baz']
+        paginator = self.index.get_paginator(object_list, 1)
+        self.assertIsInstance(paginator, Paginator)
+        self.assertEqual(paginator.object_list, object_list)
+        self.assertEqual(3, paginator.num_pages)
+
+    def test_paginate_queryset(self):
+        """paginate_queryset should return page and paginator."""
+        self.request.is_preview = True
+        children = self.index._get_children(self.request)
+        page, paginator = self.index.paginate_queryset(children['items'], 1)
+
+        self.assertIsInstance(page, PaginatorPage)
+        self.assertIsInstance(paginator, Paginator)
+        self.assertEqual(paginator.per_page, self.index.paginate_by)
+        self.assertEqual(paginator.num_pages, 1)
+
+    @patch(
+        'wagtail_events.abstract_models.AbstractPaginatedIndex.get_paginator_kwargs',
+        Mock(return_value={'foo': 'bar'})
+    )
+    @patch('wagtail_events.abstract_models.AbstractPaginatedIndex.get_paginator')
+    def test_paginate_queryset_calls_get_paginator(self, get_paginator):
+        """paginate_queryset should call the get_paginator method."""
+        self.request.is_preview = True
+        children = self.index._get_children(self.request)
+        self.index.paginate_queryset(children, 1)
+        get_paginator.assert_called_with(children, self.index.paginate_by, foo='bar')
 
     def test_pagination(self):
         """Test EventIndex.get_context paginates correctly."""
