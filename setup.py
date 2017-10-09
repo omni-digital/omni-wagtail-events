@@ -11,7 +11,7 @@ setup(
     author='Omni Digital',
     author_email='dev@omni-digital.co.uk',
     url='https://github.com/omni-digital/omni-wagtail-events',
-    download_url='https://github.com/omni-digital/omni-wagtail-events/tarball/0.1.0',
+    download_url='https://github.com/omni-digital/omni-wagtail-events/tarball/1.1.1',
     packages=find_packages(),
     license='MIT',
     classifiers=[

@@ -2,6 +2,9 @@
 
 from __future__ import unicode_literals
 
+from datetime import timedelta
+
+from django.core.exceptions import ValidationError
 from django.core.paginator import Page as PaginatorPage, Paginator
 from django.test import RequestFactory, TestCase
 from django.utils import timezone
@@ -223,3 +226,14 @@ class TestEventOccurrence(TestCase):
             start_date=timezone.now(),
         )
         self.assertEqual(instance.url, '{}{}/'.format(detail.url, instance.pk))
+
+    def test_clean(self):
+        """Clean should raise a validation error when end_date is before the start_date."""
+        now = timezone.now()
+        instance = models.EventOccurrence(
+                event=factories.EventDetailFactory.create(parent=None),
+                start_date=now,
+                end_date=now-timedelta(minutes=1),
+        )
+        with self.assertRaises(ValidationError):
+            instance.clean()

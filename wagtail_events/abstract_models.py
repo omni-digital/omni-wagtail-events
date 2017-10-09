@@ -2,6 +2,7 @@
 
 from __future__ import unicode_literals
 
+from django.core.exceptions import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.db import models
 from wagtail.wagtailadmin.edit_handlers import FieldPanel
@@ -146,3 +147,12 @@ class AbstractEventOccurrence(models.Model):
         FieldPanel('start_date'),
         FieldPanel('end_date'),
     ]
+
+    def clean(self):
+        """Clean the model fields, if end_date is before start_date raise a ValidationError."""
+        super(AbstractEventOccurrence, self).clean()
+        if self.end_date:
+            if self.end_date < self.start_date:
+                raise ValidationError({
+                    'end_date': 'The end date cannot be before the start date.'
+                })
