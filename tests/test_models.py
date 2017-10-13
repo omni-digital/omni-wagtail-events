@@ -68,17 +68,26 @@ class TestEventIndex(TestCase):
             paginate_by=10
         )
         self.detail = factories.EventDetailFactory.create(
-            parent=self.index
+            parent=self.index,
+            show_in_menus=True,
+        )
+        self.detail_2 = factories.EventDetailFactory.create(
+            parent=self.index,
+            show_in_menus=False,
         )
         self.instance = factories.EventOccurrenceFactory.create(
             event=self.detail,
+            start_date=timezone.now(),
+        )
+        self.instance_2 = factories.EventOccurrenceFactory.create(
+            event=self.detail_2,
             start_date=timezone.now(),
         )
         self.request = RequestFactory().get('')
         self.request.is_preview = False
 
     def test_parent_class(self):
-        """EventIndex should inhert from AbstractEventIndex."""
+        """EventIndex should inherit from AbstractEventIndex."""
         self.assertTrue(issubclass(
             self.model,
             abstract_models.AbstractEventIndex
@@ -186,6 +195,16 @@ class TestEventIndex(TestCase):
         self.assertIsInstance(response['paginator'], Paginator)
         self.assertTrue(response['is_paginated'])
         self.assertIn(self.instance, response['children']['items'].object_list)
+
+    def test_show_in_menus(self):
+        """ Should take in account child.show_in_menus """
+        request = RequestFactory().get('')
+        request.is_preview = True
+        self.index.paginate_by = 10
+        self.index.save()
+        context = self.index.get_context(request)
+        self.assertIn(self.instance, context['children']['items'].object_list)
+        self.assertNotIn(self.instance_2, context['children']['items'].object_list)
 
 
 class TestEventOccurrence(TestCase):

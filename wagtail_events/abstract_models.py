@@ -33,6 +33,10 @@ class AbstractPaginatedIndex(Page):
         children = model_class.objects.child_of(self)
         if not request.is_preview:
             children = children.filter(live=True)
+
+        # Children should only be displayed if show_in_menus is true.
+        children = children.filter(show_in_menus=True)
+
         return children
 
     def get_paginator_class(self):
