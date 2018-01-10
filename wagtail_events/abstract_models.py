@@ -22,7 +22,7 @@ class AbstractPaginatedIndex(Page):
         """Django model meta options."""
         abstract = True
 
-    def _get_children(self, request):
+    def _get_children(self, request, *args, **kwargs):
         """
         Helper method for getting child nodes to display in the listing.
 
