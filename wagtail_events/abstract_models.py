@@ -101,7 +101,7 @@ class AbstractPaginatedIndex(Page):
             *args,
             **kwargs
         )
-        queryset = self._get_children(request)
+        queryset = self._get_children(request, *args, **kwargs)
         is_paginated = False
         paginator = None
 
